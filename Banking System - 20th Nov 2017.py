@@ -46,8 +46,13 @@ def create_new_user():
     user = User.from_input()        #Creating user named instance through class method
     input("\nPress Enter to continue... ")
 
-
 def check_existing_user():
+
+    #calls check_if_user_exists and based on the return value calls menu_2
+    ret_val, ac_nam_num = check_if_user_exists()
+    if ret_val: menu_2(ac_nam_num)
+
+def check_if_user_exists():
 
     #Checks if user account exists
     for _ in range(3):
@@ -273,8 +278,9 @@ if __name__ == "__main__":
                 new_user_thread.join()
 
             elif int(choice) == 2:
-                ret_val, ac_nam_num = check_existing_user()
-                if ret_val: menu_2(ac_nam_num)
+                existing_user_thread = threading.Thread(target=check_existing_user())
+                existing_user_thread.start()
+                existing_user_thread.join()
 
             else:
                 print("Invalid Input! - 1")
