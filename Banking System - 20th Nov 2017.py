@@ -1,4 +1,4 @@
-import datetime, sqlite3, time, re
+import threading, datetime, sqlite3, time, re
 
 class User(object):
     
@@ -46,8 +46,13 @@ def create_new_user():
     user = User.from_input()        #Creating user named instance through class method
     input("\nPress Enter to continue... ")
 
-
 def check_existing_user():
+
+    #calls check_if_user_exists and based on the return value calls menu_2
+    ret_val, ac_nam_num = check_if_user_exists()
+    if ret_val: menu_2(ac_nam_num)
+
+def check_if_user_exists():
 
     #Checks if user account exists
     for _ in range(3):
@@ -251,14 +256,13 @@ if __name__ == "__main__":
     #Starting of the Program
     connection = sqlite3.connect("Users_db.sqlite")
     cur = connection.cursor()
-    #cur.execute("DROP TABLE IF EXISTS Bank_db")
     cur.execute("CREATE TABLE IF NOT EXISTS Bank_db (Account_name VARCHAR(50), Account_number INTEGER)")
-    print('\n'*28, "!!! Welcome to the Bank of Noida !!!")
     while True:  
         print('\n'*28)
+        print("!!! Welcome to the Bank of Noida !!!")
         print("\n\n*** MAIN SCREEN ***\nPlease select the type of user:")
-        print("1. Existing User")
-        print("2. New User")
+        print("1. New User")
+        print("2. Existing User")
         choice = input("\nPlease enter your choice (press enter to exit): ")
         try:
             if len(choice) < 1:
@@ -269,11 +273,14 @@ if __name__ == "__main__":
                 break
 
             elif int(choice) == 1:
-                ret_val, ac_nam_num = check_existing_user()
-                if ret_val: menu_2(ac_nam_num)
+                new_user_thread = threading.Thread(target=create_new_user())
+                new_user_thread.start()
+                new_user_thread.join()
 
             elif int(choice) == 2:
-                create_new_user()
+                existing_user_thread = threading.Thread(target=check_existing_user())
+                existing_user_thread.start()
+                existing_user_thread.join()
 
             else:
                 print("Invalid Input! - 1")
